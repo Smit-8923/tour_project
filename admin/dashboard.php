@@ -69,7 +69,7 @@ if (!isset($_SESSION['admin_name'])) {
             </a>
             <div id="packagesMenu" class="collapse ms-3">
                 <a href="add-package.php" class="d-flex align-items-center"><i class="bi bi-plus-circle me-2"></i> <span>Add Package</span></a>
-                <a href="manage-packages.php" class="d-flex align-items-center"><i class="bi bi-list-check me-2"></i> <span>Manage Packages</span></a>
+                <a href="manage-package.php" class="d-flex align-items-center"><i class="bi bi-list-check me-2"></i> <span>Manage Packages</span></a>
             </div>
         </div>
     

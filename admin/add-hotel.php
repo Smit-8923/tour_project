@@ -1,3 +1,9 @@
+<?php
+session_start();
+if (!isset($_SESSION['admin_name'])) {
+    header("Location: login.php");
+    exit;
+}?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -142,7 +148,7 @@
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="profile.php">Profile</a></li>
             <li><a class="dropdown-item" href="">Change Password</a></li>
-            <li><a class="dropdown-item" href="#">Logout</a></li>
+            <li><a class="dropdown-item" href="logout.php">Logout</a></li>
           </ul>
         </div>
       </div>

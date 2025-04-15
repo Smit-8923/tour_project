@@ -144,7 +144,7 @@ if (!isset($_SESSION['admin_name'])) {
         <span class="navbar-brand">Admin Dashboard</span>
         <div class="dropdown ms-auto">
           <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          <?= $_SESSION['admin_name'] ?>
+            <?= $_SESSION['admin_name'] ?>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="profile.php">Profile</a></li>
@@ -254,9 +254,28 @@ if (!isset($_SESSION['admin_name'])) {
 
         <!-- Day itinerary -->
         <div class="mb-3">
-            <label for="itinerary" class="form-label">Day-wise Itinerary</label>
-            <textarea class="form-control" id="itinerary" rows="4" placeholder="Day 1: Arrival, Day 2: Sightseeing..." name="itinerary"></textarea>
+          <label for="itinerary" class="form-label">Day-wise Itinerary</label>
+          <textarea class="form-control" id="itinerary" rows="4" placeholder="Day 1: Arrival, Day 2: Sightseeing..."
+            name="itinerary"></textarea>
         </div>
+
+        <!-- Hotel Dropdown -->
+        <div class="mb-3">
+          <label for="hotel" class="form-label">Hotel</label>
+          <select class="form-select" name="hotel_id" id="hotel" required>
+            <option value="">Select Hotel</option>
+            <?php
+             include 'config.php';
+             $hotel_query = "SELECT hotel_id, name FROM hotel ORDER BY name ASC";
+             $hotel_result = mysqli_query($conn, $hotel_query);
+
+             while ($row = mysqli_fetch_assoc($hotel_result)) {
+             echo "<option value='" . $row['hotel_id'] . "'>" . htmlspecialchars($row['name']) . "</option>";
+             }
+            ?>
+          </select>
+        </div>
+
 
 
         <!-- Base Price -->
@@ -294,6 +313,14 @@ if (!isset($_SESSION['admin_name'])) {
           <label for="coverImage" class="form-label">Cover Image</label>
           <input type="file" class="form-control" name="cover_image" id="coverImage" required>
         </div>
+
+        <!-- Gallery Images -->
+        <div class="mb-3">
+          <label for="galleryImages" class="form-label">Gallery Images</label>
+          <input type="file" class="form-control" name="gallery_images[]" id="galleryImages" multiple required>
+          <small class="form-text text-muted">You can select multiple images.</small>
+        </div>
+
 
         <!-- Package Status -->
         <div class="mb-3">
@@ -343,6 +370,23 @@ if (!isset($_SESSION['admin_name'])) {
           <textarea class="form-control" id="terms_conditions" name="terms_conditions" rows="5" required></textarea>
         </div>
 
+        <!-- Popular Package -->
+        <div class="mb-3">
+          <label class="form-label">Show as Popular Package</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="is_popular" value="1">
+            <label class="form-check-label">Mark as Popular</label>
+          </div>
+        </div>
+
+        <!-- Show in Banner -->
+        <div class="mb-3">
+          <label class="form-label">Show in Banner</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="show_in_banner" value="1">
+            <label class="form-check-label">Display in Banner</label>
+          </div>
+        </div>
 
 
         <!-- Submit Button -->

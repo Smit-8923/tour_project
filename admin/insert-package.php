@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $detailed_description = $_POST['detailed_description'];
     $category_id = $_POST['category_id'];
     $destination_id = $_POST['destination_id'];
+    $hotel_id = $_POST['hotel_id'];
     $departure_cities = $_POST['departure_cities'];
     $trip_dates = $_POST['trip_dates']; // This is an array
     $days = $_POST['days'];
@@ -22,6 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tags = $_POST['tags'];
     $status = $_POST['status'];
     $is_featured = isset($_POST['is_featured']) ? 1 : 0;
+    $is_popular = isset($_POST['is_popular']) ? 1 : 0;
+    $show_in_banner = isset($_POST['show_in_banner']) ? 1 : 0;
     $cutoff_date = $_POST['cutoff_date'];
     $cancellation_policy = $_POST['cancellation_policy'];
     $terms_conditions = $_POST['terms_conditions'];
@@ -50,21 +53,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Insert into packages table
     $sql = "INSERT INTO packages (
-        package_name, short_description, detailed_description, category_id, destination_id,
+        package_name, short_description, detailed_description, category_id, destination_id, hotel_id,
         departure_cities, days, nights, itinerary, base_price, discount, child_price,
         included, not_included, cover_image, gallery_images, tags, status, is_featured,
-        cutoff_date, cancellation_policy, terms_conditions
+        is_popular, show_in_banner, cutoff_date, cancellation_policy, terms_conditions
     ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-        "sssiiisiidddsssssssiss",
-        $package_name, $short_description, $detailed_description, $category_id, $destination_id,
+        "sssiiiisiidddssssssiiiiss",
+        $package_name, $short_description, $detailed_description, $category_id, $destination_id, $hotel_id,
         $departure_cities, $days, $nights, $itinerary, $base_price, $discount, $child_price,
         $included, $not_included, $cover_image, $gallery_images, $tags, $status, $is_featured,
-        $cutoff_date, $cancellation_policy, $terms_conditions
+        $is_popular, $show_in_banner, $cutoff_date, $cancellation_policy, $terms_conditions
     );
 
     if ($stmt->execute()) {

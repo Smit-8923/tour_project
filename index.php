@@ -1,3 +1,59 @@
+<?php
+include('config.php');
+
+// ------------------ Banner Packages ------------------
+$bannerSql = "SELECT package_name, short_description, cover_image FROM packages WHERE show_in_banner = 1 AND status = 'active'";
+$bannerResult = $conn->query($bannerSql);
+
+$slides = '';
+$indicators = '';
+$index = 0;
+
+if ($bannerResult->num_rows > 0) {
+    while ($row = $bannerResult->fetch_assoc()) {
+        $activeClass = ($index == 0) ? 'active' : '';
+        $indicators .= '
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="' . $index . '" 
+                class="' . $activeClass . '" aria-current="' . ($index == 0 ? 'true' : 'false') . '" 
+                aria-label="Slide ' . ($index + 1) . '"></button>';
+
+        $slides .= '
+            <div class="carousel-item ' . $activeClass . '">
+                <img src="uploads/' . $row['cover_image'] . '" class="d-block w-100" alt="' . htmlspecialchars($row['package_name']) . '" style="height: 500px; object-fit: cover;">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>' . htmlspecialchars($row['package_name']) . '</h5>
+                    <p>' . htmlspecialchars($row['short_description']) . '</p>
+                </div>
+            </div>';
+        $index++;
+    }
+}
+
+// ------------------ Popular Packages ------------------
+$popularSql = "SELECT id, package_name, short_description, cover_image FROM packages WHERE is_popular = 1 AND status = 'active' LIMIT 6";
+$popularResult = $conn->query($popularSql);
+
+$popularPackages = '';
+if ($popularResult->num_rows > 0) {
+    while ($row = $popularResult->fetch_assoc()) {
+        $popularPackages .= '
+        <div class="col-md-4">
+            <div class="card h-100 shadow">
+                <img src="uploads/' . $row['cover_image'] . '" class="card-img-top" alt="' . htmlspecialchars($row['package_name']) . '" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">' . htmlspecialchars($row['package_name']) . '</h5>
+                    <p class="card-text">' . htmlspecialchars($row['short_description']) . '</p>
+                    <a href="package-details.php?id=' . $row['id'] . '" class="btn btn-primary">Explore</a>
+                </div>
+            </div>
+        </div>';
+    }
+}
+
+$conn->close();
+?>
+
+
 <!doctype html>
 <html lang="en">
 
@@ -40,7 +96,8 @@
                     </li>
                 </ul>
                 <div class="d-flex">
-                    <a href="user/login.php" class="me-2"><button type="button" class="btn btn-info">Sign In</button></a>
+                    <a href="user/login.php" class="me-2"><button type="button" class="btn btn-info">Sign
+                            In</button></a>
                     <a href="user/register.php"><button type="button" class="btn btn-info">Sign Up</button></a>
                 </div>
             </div>
@@ -50,41 +107,12 @@
 
 
     <!-- main section start -->
-
-    <div id="carouselExampleCaptions" class="carousel slide">
+    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
-                aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
-                aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
-                aria-label="Slide 3"></button>
+            <?= $indicators ?>
         </div>
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>First slide label</h5>
-                    <p>Some representative placeholder content for the first slide.</p>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Second slide label</h5>
-                    <p>Some representative placeholder content for the second slide.</p>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Third slide label</h5>
-                    <p>Some representative placeholder content for the third slide.</p>
-                </div>
-            </div>
+            <?= $slides ?>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
             data-bs-slide="prev">
@@ -123,56 +151,17 @@
         <div class="container">
             <h2 class="text-center mb-4">Popular Packages</h2>
             <div class="row g-4">
-
-                <!-- Package Card 1 -->
-                <div class="col-md-4">
-                    <div class="card h-100 shadow">
-                        <img src="images/packages/beach.jpg" class="card-img-top" alt="Beach Package"
-                            style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">Beach Paradise</h5>
-                            <p class="card-text">Relax on the sunny shores with our all-inclusive beach vacation
-                                package.</p>
-                            <a href="packages.php" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Package Card 2 -->
-                <div class="col-md-4">
-                    <div class="card h-100 shadow">
-                        <img src="images/packages/mountain.jpg" class="card-img-top" alt="Mountain Package"
-                            style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">Mountain Adventure</h5>
-                            <p class="card-text">Hike through breathtaking mountain trails with experienced guides.</p>
-                            <a href="packages.php" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Package Card 3 -->
-                <div class="col-md-4">
-                    <div class="card h-100 shadow">
-                        <img src="images/packages/city.jpg" class="card-img-top" alt="City Package"
-                            style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">City Explorer</h5>
-                            <p class="card-text">Discover vibrant city life, iconic landmarks, and top-rated dining
-                                spots.</p>
-                            <a href="packages.php" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-
+                <?= $popularPackages ?>
             </div>
 
             <!-- View More Button -->
             <div class="text-center mt-4">
-                <a href="packages.php" class="btn btn-outline-primary px-4">View More Packages</a>
+                <a href="user/login.php" onclick="alert('Please sign in or sign up first.');"
+                    class="btn btn-outline-primary px-4">View More Packages</a>
             </div>
         </div>
     </section>
+
     <!-- packages section end -->
 
     <!-- customer review section start -->

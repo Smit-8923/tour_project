@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['admin_name'])) {
+    header("Location: login.php");
+    exit;
+}?>
+<?php
 // Database connection
 $host = "localhost";
 $username = "root";
@@ -123,12 +129,12 @@ $result = $conn->query("SELECT * FROM category_table ORDER BY c_id ");
                 <span class="navbar-brand">Admin Dashboard</span>
                 <div class="dropdown ms-auto">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Admin
+                    <?= $_SESSION['admin_name'] ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="profile.php">Profile</a></li>
                         <li><a class="dropdown-item" href="">Change Password</a></li>
-                        <li><a class="dropdown-item" href="#">Logout</a></li>
+                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>

@@ -2,6 +2,61 @@
     include("config.php");
     session_start();
 ?>
+<?php
+include('config.php');
+
+// ------------------ Banner Packages ------------------
+$bannerSql = "SELECT package_name, short_description, cover_image FROM packages WHERE show_in_banner = 1 AND status = 'active'";
+$bannerResult = $conn->query($bannerSql);
+
+$slides = '';
+$indicators = '';
+$index = 0;
+
+if ($bannerResult->num_rows > 0) {
+    while ($row = $bannerResult->fetch_assoc()) {
+        $activeClass = ($index == 0) ? 'active' : '';
+        $indicators .= '
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="' . $index . '" 
+                class="' . $activeClass . '" aria-current="' . ($index == 0 ? 'true' : 'false') . '" 
+                aria-label="Slide ' . ($index + 1) . '"></button>';
+
+        $slides .= '
+            <div class="carousel-item ' . $activeClass . '">
+                <img src="../uploads/' . $row['cover_image'] . '" class="d-block w-100" alt="' . htmlspecialchars($row['package_name']) . '" style="height: 500px; object-fit: cover;">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>' . htmlspecialchars($row['package_name']) . '</h5>
+                    <p>' . htmlspecialchars($row['short_description']) . '</p>
+                </div>
+            </div>';
+        $index++;
+    }
+}
+
+// ------------------ Popular Packages ------------------
+$popularSql = "SELECT id, package_name, short_description, cover_image FROM packages WHERE is_popular = 1 AND status = 'active' LIMIT 6";
+$popularResult = $conn->query($popularSql);
+
+$popularPackages = '';
+if ($popularResult->num_rows > 0) {
+    while ($row = $popularResult->fetch_assoc()) {
+        $popularPackages .= '
+        <div class="col-md-4">
+            <div class="card h-100 shadow">
+                <img src="../uploads/' . $row['cover_image'] . '" class="card-img-top" alt="' . htmlspecialchars($row['package_name']) . '" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">' . htmlspecialchars($row['package_name']) . '</h5>
+                    <p class="card-text">' . htmlspecialchars($row['short_description']) . '</p>
+                    <a href="package-details.php?id=' . $row['id'] . '" class="btn btn-primary">Explore</a>
+                </div>
+            </div>
+        </div>';
+    }
+}
+
+$conn->close();
+?>
+
 
 <!doctype html>
 <html lang="en">
@@ -16,42 +71,30 @@
 
 <body>
     <!-- header start -->
-    <nav class="navbar  navbar-expand-lg bg-dark-body-tertiary sticky-top " style="background-color: #e3f2fd;">
+    <nav class="navbar navbar-expand-lg bg-dark-body-tertiary sticky-top" style="background-color: #e3f2fd;">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">itravel</a>
+            <a class="navbar-brand" href="index.php">iTravel</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+                data-bs-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="collapse navbar-collapse text-center" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link active" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">about</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#packages" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Packages
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Advantare</a></li>
-                            <li><a class="dropdown-item" href="#">Mountain</a></li>
-                            <li><a class="dropdown-item" href="#">Ocean</a></li>
-                        </ul>
+                        <a class="nav-link" href="about.php">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" aria-disabled="true">Contact Us</a>
+                        <a class="nav-link" href="user-package.php">Packages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="contact.php">Contact Us</a>
                     </li>
                 </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-                <div class="username ms-4">
+            </div>
+            <div class="username ms-4">
                 <?php 
                             
                             if(isset($_SESSION['username'])) {
@@ -66,49 +109,17 @@
                                 echo '<a href="user/login.php" class="btn btn-danger px-4 py-2">Login</a>';
                             }
                         ?>
-                </div>
             </div>
         </div>
     </nav>
-    <!-- header end -->
-
-
+    <!-- header-end  -->
     <!-- main section start -->
-
-    <div id="carouselExampleCaptions" class="carousel slide">
+    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
-                aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
-                aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
-                aria-label="Slide 3"></button>
+            <?= $indicators ?>
         </div>
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>First slide label</h5>
-                    <p>Some representative placeholder content for the first slide.</p>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Second slide label</h5>
-                    <p>Some representative placeholder content for the second slide.</p>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/banner/image.png" class="d-block w-100" alt="..."
-                    style="height: 500px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Third slide label</h5>
-                    <p>Some representative placeholder content for the third slide.</p>
-                </div>
-            </div>
+            <?= $slides ?>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
             data-bs-slide="prev">
@@ -122,192 +133,83 @@
         </button>
     </div>
 
-    <!-- about start -->
-
-    
-    <div class="container my-5" id="about">
-        <h4 class="display-4 text-center">About</h4>
-    </div>
-
-    <div class="container mt-5">
-        <div class="row">
-          <!-- First part: Photos -->
-          <div class="col-md-6">
-            <div class="card">
-              <img src="images/banner/image.png" style="height: 300px; object-fit: cover;" class="card-img-top" alt="Company Image">
-              <!-- <img src="https://via.placeholder.com/500" class="card-img-top mt-2" alt="Company Image 2"> -->
-            </div>
-          </div>
-      
-          <!-- Second part: Paragraph (About our company) -->
-          <div class="col-md-6">
-            <h2>About Our Company</h2>
-            <p>
-              Our company is a leader in providing innovative solutions to help businesses succeed in a competitive environment. We specialize in delivering high-quality services, ensuring that every project is handled with the utmost professionalism and dedication. Our team is composed of experts in various fields who work together to achieve excellence and customer satisfaction. We are committed to continuous improvement and strive to stay ahead of industry trends to offer the best solutions to our clients.
-            </p>
-          </div>
-        </div>
-      </div>
-     <!-- about end  -->
-
-    <div class="container my-5" id="Packages">
-        <h4 class="display-4 text-center">Packages</h4>
-    </div>
-
-
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="images/logoo.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-danger">Book now</a>
-                        </div>
-                    </div>
+    <!-- search section start -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-4">Find Your Perfect Destination</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2 p-3" type="search" placeholder="Search packages or destinations"
+                            aria-label="Search">
+                        <button class="btn btn-primary px-4" type="submit">Search</button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+    <!-- search section end -->
+    <!-- start package section -->
 
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Popular Packages</h2>
+            <div class="row g-4">
+                <?= $popularPackages ?>
+            </div>
+
+            <!-- View More Button -->
+            <div class="text-center mt-4">
+                <a href="user/login.php" onclick="alert('Please sign in or sign up first.');"
+                    class="btn btn-outline-primary px-4">View More Packages</a>
+            </div>
+        </div>
+    </section>
+    <!-- packages section end -->
 
     <!-- main section end -->
 
-    <!-- footer start -->
-    <!-- Footer start -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <!-- Footer -->
+    <footer style="background-color: #e3f2fd;" class="text-dark pt-5 pb-4 text-center text-md-start">
         <div class="container">
             <div class="row">
-                <!-- Column 1: Links -->
-                <div class="col-md-4">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Home</a></li>
-                        <li><a href="#" class="text-white">About</a></li>
-                        <li><a href="#" class="text-white">Services</a></li>
-                        <li><a href="#" class="text-white">Packages</a></li>
-                        <li><a href="#" class="text-white">Contact</a></li>
-                    </ul>
+                <div class="col-md-3">
+                    <h5 class="text-uppercase fw-bold mb-4">iTravel</h5>
+                    <p>Explore the India with us. We offer the best tour and travel packages tailored for unforgettable
+                        experiences.</p>
                 </div>
-
-                <!-- Column 2: Contact Info -->
-                <div class="col-md-4">
-                    <h5>Contact Us</h5>
-                    <p><i class="bi bi-geo-alt"></i> S.G Highway, Ahmedabad</p>
-                    <p><i class="bi bi-telephone"></i> +91 9510246043</p>
-                    <p><i class="bi bi-envelope"></i> contact@itravel.com</p>
+                <div class="col-md-2">
+                    <h6 class="text-uppercase fw-bold mb-4">Quick Links</h6>
+                    <p><a href="home.php" class="text-dark text-decoration-none">Home</a></p>
+                    <p><a href="packages.php" class="text-dark text-decoration-none">Packages</a></p>
+                    <p><a href="about.php" class="text-dark text-decoration-none">About</a></p>
+                    <p><a href="contact.php" class="text-dark text-decoration-none">Contact</a></p>
                 </div>
-
-                <!-- Column 3: Social Media Links -->
-                <div class="col-md-4">
-                    <h5>Follow Us</h5>
-                    <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="text-white me-3"><i class="bi bi-twitter"></i></a>
-                    <a href="#" class="text-white me-3"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
+                <div class="col-md-3">
+                    <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
+                    <p><i class="bi bi-geo-alt-fill me-2"></i> Ahmedabad, Gujarat, India</p>
+                    <p><i class="bi bi-envelope-fill me-2"></i> support@itravel.com</p>
+                    <p><i class="bi bi-phone-fill me-2"></i> +91 9876543210</p>
                 </div>
-            </div>
-
-            <!-- Copyright -->
-            <div class="text-center mt-4">
-                <p>&copy; <span id="copyrightYear"></span> itravel. All Rights Reserved.</p>
+                <div class="col-md-4">
+                    <h6 class="text-uppercase fw-bold mb-4">Follow Us</h6>
+                    <a href="#" class="text-dark me-3 fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-dark me-3 fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-dark me-3 fs-5"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="text-dark me-3 fs-5"><i class="bi bi-youtube"></i></a>
+                </div>
             </div>
         </div>
+        <div class="text-center py-3 border-top border-secondary mt-4">
+            <p class="mb-0">&copy; <span id="copyrightYear"></span> iTravel. All Rights Reserved.</p>
+        </div>
     </footer>
-    <!-- Footer end -->
 
-
-    <!-- footer end  -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
-        <script>
-            // Get the current year
-            const currentYear = new Date().getFullYear();
-            
-            // Set the current year in the span with id 'copyrightYear'
-            document.getElementById('copyrightYear').textContent = currentYear;
-        </script>
+    <!-- Scripts -->
+    <script>
+        document.getElementById("copyrightYear").textContent = new Date().getFullYear();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
