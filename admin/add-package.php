@@ -214,19 +214,15 @@ if (!isset($_SESSION['admin_name'])) {
           </select>
         </div>
 
-
-        <!-- Departure Cities (Multiselect) -->
+        <!-- Departure City  -->
         <div class="mb-3">
-          <label class="form-label">Departure Cities</label>
-          <div class="d-flex mb-2">
-            <input type="text" id="cityInput" class="form-control me-2" placeholder="Enter City Name">
-            <input type="hidden" name="departure_cities" id="departureCitiesHidden">
-            <button type="button" class="btn btn-success" onclick="addCity()">Add</button>
-          </div>
-          <div id="cityList" class="mb-2">
-            <!-- Dynamic tags will be added here -->
-          </div>
+        <label for="departureCity" class="form-label">Departure Cities</label>
+        <div id="departureCitiesContainer">
+          <input type="text" class="form-control mb-2" name="departure_cities[]" placeholder="Enter Departure City" required>
         </div>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addDepartureCity()">+ Add Another City</button>
+        </div>
+
 
 
         <!-- Available Trip Dates (Multiselect) -->
@@ -409,39 +405,19 @@ if (!isset($_SESSION['admin_name'])) {
     </script>
 
     <!-- city add  -->
-    <script>
-      const cityInput = document.getElementById('cityInput');
-      const cityList = document.getElementById('cityList');
-      const departureCitiesHidden = document.getElementById('departureCitiesHidden');
-      let cities = [];
-
-      function addCity() {
-        const city = cityInput.value.trim();
-        if (city && !cities.includes(city)) {
-          cities.push(city);
-          updateCityList();
-        }
-        cityInput.value = '';
-      }
-
-      function removeCity(index) {
-        cities.splice(index, 1);
-        updateCityList();
-      }
-
-      function updateCityList() {
-        cityList.innerHTML = '';
-        cities.forEach((city, index) => {
-          cityList.innerHTML += `
-        <span class="badge bg-primary me-2 mb-2">
-          ${city}
-          <button type="button" class="btn-close btn-close-white btn-sm ms-2" onclick="removeCity(${index})"></button>
-        </span>
-      `;
-        });
-        departureCitiesHidden.value = cities.join(',');
-      }
-    </script>
+  <script>
+  function addDepartureCity() 
+  {
+    const container = document.getElementById('departureCitiesContainer');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'departure_cities[]';
+    input.className = 'form-control mb-2';
+    input.placeholder = 'Enter Departure City';
+    input.required = true;
+    container.appendChild(input);
+  }
+  </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

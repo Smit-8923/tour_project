@@ -1,6 +1,9 @@
 <?php
 include('config.php');
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Fetch all inputs
@@ -10,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category_id = $_POST['category_id'];
     $destination_id = $_POST['destination_id'];
     $hotel_id = $_POST['hotel_id'];
-    $departure_cities = $_POST['departure_cities'];
+    $departure_cities = $_POST['departure_cities']; // This is an array
     $trip_dates = $_POST['trip_dates']; // This is an array
     $days = $_POST['days'];
     $nights = $_POST['nights'];
@@ -62,33 +65,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     )";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param(
-        "sssiiiisiidddssssssiiiiss",
-        $package_name, $short_description, $detailed_description, $category_id, $destination_id, $hotel_id,
-        $departure_cities, $days, $nights, $itinerary, $base_price, $discount, $child_price,
-        $included, $not_included, $cover_image, $gallery_images, $tags, $status, $is_featured,
-        $is_popular, $show_in_banner, $cutoff_date, $cancellation_policy, $terms_conditions
-    );
+    if ($stmt === false) {
+        echo "Error preparing statement: " . $conn->error;
+    } else {
+        $stmt->bind_param(
+            "sssiiiisiidddssssssiiiiss",
+            $package_name, $short_description, $detailed_description, $category_id, $destination_id, $hotel_id,
+            $departure_cities, $days, $nights, $itinerary, $base_price, $discount, $child_price,
+            $included, $not_included, $cover_image, $gallery_images, $tags, $status, $is_featured,
+            $is_popular, $show_in_banner, $cutoff_date, $cancellation_policy, $terms_conditions
+        );
 
-    if ($stmt->execute()) {
-        $package_id = $stmt->insert_id;
+        if ($stmt->execute()) {
+            $package_id = $stmt->insert_id;  // Get the inserted package ID
 
-        // Now insert trip dates into a separate table
-        if (!empty($trip_dates)) {
-            $date_stmt = $conn->prepare("INSERT INTO package_trip_dates (package_id, trip_date) VALUES (?, ?)");
-            foreach ($trip_dates as $date) {
-                $date_stmt->bind_param("is", $package_id, $date);
-                $date_stmt->execute();
+            // Insert departure cities into package_departure_table
+            if (!empty($departure_cities)) {
+                $city_stmt = $conn->prepare("INSERT INTO package_departure_city (package_id, city_name) VALUES (?, ?)");
+                if ($city_stmt === false) {
+                    // Output error if prepare() fails
+                    echo "Error preparing departure city statement: " . $conn->error;
+                } else {
+                    foreach ($departure_cities as $city) {
+                        $city_stmt->bind_param("is", $package_id, $city); // Bind package_id and each departure city
+                        $city_stmt->execute();
+                    }
+                    $city_stmt->close();
+                }
             }
-            $date_stmt->close();
+
+            // Now insert trip dates into a separate table
+            if (!empty($trip_dates)) {
+                $date_stmt = $conn->prepare("INSERT INTO package_trip_dates (package_id, trip_date) VALUES (?, ?)");
+                foreach ($trip_dates as $date) {
+                    $date_stmt->bind_param("is", $package_id, $date);
+                    $date_stmt->execute();
+                }
+                $date_stmt->close();
+            }
+
+            echo "✅ Package, departure cities, and trip dates inserted successfully!";
+        } else {
+            echo "❌ Error inserting package: " . $stmt->error;
         }
 
-        echo "✅ Package and trip dates inserted successfully!";
-    } else {
-        echo "❌ Error inserting package: " . $stmt->error;
+        $stmt->close();
     }
 
-    $stmt->close();
     $conn->close();
 } else {
     echo "Invalid request method.";
